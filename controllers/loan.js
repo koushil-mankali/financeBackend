@@ -1,7 +1,15 @@
 const LOAN = require("../modals/loan");
 const TRANS = require("../modals/transactions");
+const { validationResult } = require('express-validator'); 
 
 exports.takeLoan = (req, res) => {
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ message: "Error!", errors: errors.array() });
+    }
+
     const userId = req.body.userId; 
     const loanAmount = req.body.loanAmount; 
     const interest = req.body.interest; 
@@ -46,6 +54,14 @@ exports.loanRequests = (req, res) => {
 }
 
 exports.loanApproval = (req, res) => {
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ message: "Error!", errors: errors.array() });
+    }
+
+
     const loanId = req.body.loanId; 
     const userId = req.body.userId; 
     const loanApproval = req.body.loanApproval;
@@ -80,6 +96,13 @@ exports.rejectedLoans = (req, res) => {
 }
 
 exports.loansData = (req, res) => {
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ message: "Error!", errors: errors.array() });
+    }
+
     const userId = req.body.userId; 
 
     //Take from database

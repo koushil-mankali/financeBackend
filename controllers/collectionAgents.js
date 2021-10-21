@@ -1,9 +1,9 @@
 const bcrypt = require("bcryptjs");
+const { validationResult } = require('express-validator'); 
 
 const CAG = require("../modals/collectionAgent");
 
 exports.AllCollectionAgents = (req, res) => {
-
     CAG.find().then(result => {
         if(!result){
             throw new Error("No Data Found!")
@@ -28,6 +28,12 @@ exports.AllCollectionAgents = (req, res) => {
 }
 
 exports.createCollectionAgent = (req, res) => {
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ message: "Error!", errors: errors.array() });
+    }
 
     const agentName = req.body.agentName;
     const agentEmail = req.body.agentEmail;

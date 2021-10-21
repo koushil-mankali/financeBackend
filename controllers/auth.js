@@ -1,12 +1,18 @@
 const jwt = require("jsonwebtoken");
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcryptjs');   
+const { validationResult } = require('express-validator'); 
 
 const User = require("../modals/user");
 
 exports.login = (req, res) => {
-
     const email = req.body.email;
     const password = req.body.password;
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ message: "Error!", errors: errors.array() });
+      }
 
     User.findOne({email: email}).then(user => {
         if(!user){
@@ -32,6 +38,12 @@ exports.signup = (req, res, next) => {
     const username = req.body.username;
     const email = req.body.email;
     const password = req.body.password;
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ message: "Error!", errors: errors.array() });
+      }
 
     User.findOne({email: email}).then(user => {
         if(user){

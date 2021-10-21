@@ -1,7 +1,16 @@
 const User = require("../modals/user");
 const KYC = require("../modals/kyc");
+const { validationResult } = require('express-validator'); 
 
 exports.createUser = (req, res) => {
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ message: "Error!", errors: errors.array() });
+    }
+
+
     const userName = req.body.userName;
     const userEmail = req.body.userEmail;
     const userPhone = req.body.userPhone;
@@ -31,6 +40,13 @@ exports.createUser = (req, res) => {
 }
 
 exports.userKYC = (req, res) => {
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ message: "Error!", errors: errors.array() });
+    }
+
 
     const userId = req.body.userId;
     const panCardNo = req.body.panNo; 
@@ -63,6 +79,13 @@ exports.userKYC = (req, res) => {
 }
 
 exports.loanDetails = (req, res) => {
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ message: "Error!", errors: errors.array() });
+    }
+
 
     const loanAmount = Number(req.body.loanAmount); 
     const interestPercent = 2; 

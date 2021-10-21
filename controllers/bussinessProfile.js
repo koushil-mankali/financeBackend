@@ -1,4 +1,5 @@
 const BP = require("../modals/bussinessProfile");
+const { validationResult } = require('express-validator'); 
 
 exports.getData = (req, res) => {
     BP.find().then(data => {
@@ -14,6 +15,13 @@ exports.getData = (req, res) => {
 }
 
 exports.postData = (req, res) => {
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ message: "Error!", errors: errors.array() });
+    }
+
     BP.findOne({}).then(result => {
         if(result){
             result.companyName = req.body.companyName;

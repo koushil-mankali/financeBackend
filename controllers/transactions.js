@@ -1,6 +1,14 @@
 const TRANS = require("../modals/transactions");
+const { validationResult } = require('express-validator'); 
 
 exports.previousTransactions = (req, res) => {
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ message: "Error!", errors: errors.array() });
+    }
+
     const userId = req.body?.userId;
 
     //Take from database
@@ -29,6 +37,14 @@ exports.previousTransactions = (req, res) => {
 }
 
 exports.newTransaction = (req, res) => {
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ message: "Error!", errors: errors.array() });
+    }
+
+
     const userId = req.body.userId;
     const loanId = req.body.loanId;
     const date = new Date();

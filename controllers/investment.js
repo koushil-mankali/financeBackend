@@ -1,4 +1,5 @@
 const INST = require("../modals/investment");
+const { validationResult } = require('express-validator'); 
 
 exports.getInvestMentData = (req, res) => {
     INST.find().then(result => {
@@ -15,6 +16,13 @@ exports.getInvestMentData = (req, res) => {
 
 exports.addCapital = (req, res) => {
     const AddCapital = req.addCapital;
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ message: "Error!", errors: errors.array() });
+    }
+
 
     INST.findOne({}, {sort:{$natural:-1}}).then(result => {
             // Take from database
