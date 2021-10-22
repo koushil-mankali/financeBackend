@@ -1,9 +1,9 @@
 const INST = require("../modals/investment");
 const { validationResult } = require('express-validator'); 
 
-exports.getInvestMentData = (req, res) => {
+exports.getInvestMentData = (req, res, next) => {
     INST.find().then(result => {
-        if(!result){
+        if(!result || result.length <=0){
             throw new Error("No Data Found!");
         }
         return res.status(200).json({message:"Success", data: result})
@@ -14,8 +14,8 @@ exports.getInvestMentData = (req, res) => {
     })
 }
 
-exports.addCapital = (req, res) => {
-    const AddCapital = req.addCapital;
+exports.addCapital = (req, res, next) => {
+    const AddCapital = req.body.addCapital;
 
     const errors = validationResult(req);
 
@@ -24,15 +24,27 @@ exports.addCapital = (req, res) => {
     }
 
 
-    INST.findOne({}, {sort:{$natural:-1}}).then(result => {
-            // Take from database
-        const previousCapitalAmount = result.previousCapitalAmount;
-        const totalNewCapital = previousCapitalAmount + AddCapital;
-        const date = new Date();
-        
-        const addNewCapital = new INST({capitalAmount: previousCapitalAmount, totalInvestment: totalNewCapital, date: date});
+    INST.findOne().sort({ createdAt: -1 }).limit(1).then(result => {
+
+        let previousCapitalAmount;
+        let totalInvestment;
+        let date;
+
+        if(!result){
+            console.log(1)
+            previousCapitalAmount = AddCapital;
+            totalInvestment = previousCapitalAmount;
+            date = new Date();
+        }else{
+            console.log(2, result?.totalInvestment)
+            previousCapitalAmount = result?.totalInvestment + +AddCapital;
+            totalInvestment = previousCapitalAmount;
+            date = new Date();
+        }
+
+        const addNewCapital = new INST({capitalAmount: previousCapitalAmount, totalInvestment: totalInvestment, date: date});
         addNewCapital.save().then( () => {
-            return res.status(200).json({message: 'Success', data: {totalNewCapital: totalNewCapital, date:date, previousCapital: previousCapitalAmount}})
+            return res.status(200).json({message: 'Success', data: {capitalAmount:previousCapitalAmount, totalInvestment: totalInvestment, date:date}})
         })
     }).catch(err => {
         let error = new Error(err);

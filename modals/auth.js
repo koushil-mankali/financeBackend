@@ -5,7 +5,8 @@ const {Schema} = mongoose;
 const Auth = new Schema({
     username: String,
     email: {
-        type: String
+        type: String,
+        required: true
     },
     password: {
         type: String,

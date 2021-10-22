@@ -1,12 +1,13 @@
 const express = require("express");
 const {body} = require("express-validator");
+const isAuth = require("../middleware/isAuth");
 const route = express.Router();
 
 const collectionAgentsCont = require("../controllers/collectionAgents");
 
 route.get("/all-agents", collectionAgentsCont.AllCollectionAgents);
 
-route.post("/create-collection-agent",[
+route.post("/create-collection-agent", isAuth, [
     body("agentName").not().isEmpty().withMessage("Please Fill all the Fields!"),
     body("agentEmail").not().isEmpty().withMessage("Please Fill all the Fields!"),
     body("agentPhone").not().isEmpty().withMessage("Please Fill all the Fields!"),

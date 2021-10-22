@@ -3,31 +3,30 @@ const mongoose = require("mongoose");
 const {Schema} = mongoose;
 
 const CollectionAgent = new Schema({
-    username: {
+    agentName: {
         type:String,
         required: true
     },
-    email:{
+    agentEmail:{
         type: String,
         required: true
     },
-    phone: {
+    agentPhone: {
         type: Number,
         required: true
     },
-    photo: {
+    agentPhoto: {
+        type: String
+    },
+    agentPassword: {
         type: String,
         required: true
     },
-    password: {
+    agentAddress: {
         type: String,
         required: true
     },
-    address: {
-        type: String,
-        required: true
-    },
-    aadharNo: {
+    agentAadharNo: {
         type: Number,
         required: true
     },

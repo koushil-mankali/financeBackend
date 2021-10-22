@@ -16,7 +16,7 @@ const Transactions = new Schema({
     loanStartDate: {
         type: Date,
     },
-    loanEndDate: {
+    loanClosingDate: {
         type: Date
     },
     actualDayOfPay: {

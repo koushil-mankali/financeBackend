@@ -1,10 +1,13 @@
 const express = require("express");
 const {body} = require("express-validator");
 const userCont = require("../controllers/user"); 
+const isAuth = require("../middleware/isAuth");
 
 const route = express.Router();
 
-route.post("/create-user", [
+route.get("/all-users", userCont.getAllUsers);
+
+route.post("/create-user", isAuth, [
     body("userName").not().isEmpty().withMessage("Please fill all the Fields!"),
     body("userEmail").isEmail().withMessage("Please Enter a valid Email!").not().isEmpty().withMessage("Please fill all the Fields!"),
     body("userPhone").not().isEmpty().withMessage("Please fill all the Fields!"),
@@ -14,12 +17,10 @@ route.post("/create-user", [
     body("status").not().isEmpty().withMessage("Please fill all the Fields!"),
 ], userCont.createUser);
 
-route.post("/user-kyc", [
+route.post("/user-kyc", isAuth, [
     body("userId").not().isEmpty().withMessage("Something went wrong!"),
     body("panCardNo").not().isEmpty().withMessage("Please fill all the Fields!"),
     body("aadharNo").not().isEmpty().withMessage("Please fill all the Fields!")
 ], userCont.userKYC)
-
-route.post("/calculate-loan-details", userCont.loanDetails)
 
 module.exports = route;

@@ -14,8 +14,8 @@ const isAuth = (req, res, next) => {
 
     if(token){
         decodedToken = jws.verify(token, "supersecretsecret")
-        decodedToken.userId = userId
-        decodedToken.userRole = userRole
+        decodedToken.userId = decodedToken.userId
+        decodedToken.userRole = decodedToken.userRole
     }else{
         req.userid= null
         let error = new Error("No Token Found!")

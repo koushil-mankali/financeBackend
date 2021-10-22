@@ -9,17 +9,19 @@ const BussinessProfile = new Schema({
     companyLogo: {
         type: String
     },
-    phone: {
+    companyAddress: {
+        type: String
+    },
+    gstNo: {
         type: Number,
     },
-    password: {
-        type: String,
-        required: true
-    },
-    address: {
+    panNo: {
         type: String
     },
     aadharNo: {
+        type: Number
+    },
+    capitalInvestment: {
         type: Number
     }
 })

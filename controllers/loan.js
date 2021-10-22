@@ -1,8 +1,51 @@
 const LOAN = require("../modals/loan");
 const TRANS = require("../modals/transactions");
+const User = require("../modals/user");
 const { validationResult } = require('express-validator'); 
 
-exports.takeLoan = (req, res) => {
+exports.calculateLoanDetails = (req, res) => {
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ message: "Error!", errors: errors.array() });
+    }
+
+    const loanAmount = Number(req.body.loanAmount); 
+    const interestPercent = 2; 
+    const durationType = req.body.durationType; 
+    const duration = Number(req.body.duration); 
+
+    let totalAmount;
+
+    if(durationType === "day") {
+        totalAmount = (((loanAmount * interestPercent * duration) / 100) * 1/365);
+    }else if (durationType === "month") {
+        totalAmount = ((loanAmount  * interestPercent * (duration * 30)) / 100) * 1/ 365;
+    }else if (durationType === "year") {
+        totalAmount = (loanAmount  * interestPercent * duration) / 100;
+    }
+
+    totalAmount = totalAmount + loanAmount
+
+
+    res.status(200).json({message: "Success!", data: {"Loan Amount": loanAmount, "Interest Percentage": interestPercent, "Duration Type": durationType, "Duration": duration, "Total Amount": +totalAmount.toFixed(2)}});
+}
+
+exports.allLoans = (req, res, next) => {
+    LOAN.find().then(loanData => {
+        if(!loanData){
+            throw new Error("No Data Avaliable!");
+        }
+        return res.status(200).json({message: 'All Loans Data!', data: loanData})
+    }).catch(err => {
+        let error = new Error(err);
+        error.statuscode = 401
+        next(error)
+    })
+}
+
+exports.takeLoan = (req, res, next) => {
 
     const errors = validationResult(req);
 
@@ -13,14 +56,31 @@ exports.takeLoan = (req, res) => {
     const userId = req.body.userId; 
     const loanAmount = req.body.loanAmount; 
     const interest = req.body.interest; 
+    const durationType = req.body.durationType;
     const duration = req.body.duration; 
     const loanStartDate = req.body.loanStartDate; 
     const loanClosingDate = req.body.loanClosingDate; 
-    const loanApproval = "pending";
+    const loanApproval = "PENDING";
 
-    const newLoan = new LOAN({userId: userId, loanAmount, loanAmount, interest: interest, duration: duration, loanStartDate: loanStartDate, loanClosingDate: loanClosingDate, loanApproval: loanApproval});
+    let totalAmount;
+    let dailyCount;
+
+    if(durationType === "day") {
+        totalAmount = (((loanAmount * interest * duration) / 100) * 1/365);
+        dailyCount = duration;
+    }else if (durationType === "month") {
+        totalAmount = ((loanAmount  * interest * (duration * 30)) / 100) * 1/ 365;
+        dailyCount = duration * 30;
+    }else if (durationType === "year") {
+        totalAmount = (loanAmount  * interest * duration) / 100;
+        dailyCount = duration * 365;
+    }
+
+    const dailyPayableAmount = (totalAmount + loanAmount / dailyCount).toFixed(2);
+    
+    const newLoan = new LOAN({userId: userId, loanAmount: loanAmount, dailyPayableAmount:dailyPayableAmount, interest: interest, durationType:durationType, duration: duration, loanStartDate: loanStartDate, loanClosingDate: loanClosingDate, loanApproval: loanApproval});
     newLoan.save().then(() => {
-        return res.status(200).json({message: "Loan Details Successfully Recivied!", data: {userId, loanAmount, interest, duration, loanStartDate, loanClosingDate, loanApproval}})
+        return res.status(200).json({message: "Loan Details Successfully Recivied!", data: {userId, loanAmount, interest, dailyPayableAmount, duration, loanStartDate, loanClosingDate, loanApproval}})
     }).catch(err => {
         let error = new Error(err);
         error.statuscode = 401
@@ -28,24 +88,15 @@ exports.takeLoan = (req, res) => {
     })
 }
 
-exports.loanRequests = (req, res) => {
+exports.loanRequests = (req, res, next) => {
 
-    LOAN.find({loanApproval: "pending"}).then(result => {
+    LOAN.find({loanApproval: "PENDING"}).then(result => {
 
         if(!result){
             throw new Error("No Data Found!");
         }
 
-        // Take from database
-        const userId = result.userId; 
-        const loanAmount = result.loanAmount; 
-        const interest = result.interest; 
-        const duration = result.duration; 
-        const loanStartDate = result.loanStartDate; 
-        const loanClosingDate = result.loanClosingDate; 
-        const loanApproval = result.loanApproval;
-
-        return res.status(200).json({message: "Loan Requests!", data: {userId, loanAmount, interest, duration, loanStartDate, loanClosingDate, loanApproval}})
+        return res.status(200).json({message: "Loan Requests!", data: result})
     }).catch(err => {
         let error = new Error(err);
         error.statuscode = 401
@@ -53,7 +104,7 @@ exports.loanRequests = (req, res) => {
     })
 }
 
-exports.loanApproval = (req, res) => {
+exports.loanApproval = (req, res, next) => {
 
     const errors = validationResult(req);
 
@@ -66,13 +117,22 @@ exports.loanApproval = (req, res) => {
     const userId = req.body.userId; 
     const loanApproval = req.body.loanApproval;
 
-    LOAN.find({loanId: loanId, userId:userId}).then(result => {
+    LOAN.findOneAndUpdate({loanId: loanId, userId: userId}, {loanApproval:loanApproval},{
+        new: true
+    }).then((result) => {
         if(!result){
             throw new Error("No Data Found!");
         }
-        result.loanApproval = loanApproval;
-        result.save().then( () => {
-            return res.status(200).json({message: "Loan Approval!", data: {loanId, userId, loanApproval}})
+        TRANS.findOne({loanId: loanId, userId: userId}).then(transactions => {
+            if(transactions){
+                throw new Error("Loan already Approved!");
+            }
+            const newTrans = new TRANS({loanId: loanId, userId: userId, loanStartDate: result.loanStartDate, loanClosingDate: result.loanClosingDate, actualDayOfPay: null, dateOfPaytment: null, payableAmount: null, payedAmount: null, dueAmount: null, date: new Date()});
+            newTrans.save().then(result => {
+                User.findOneAndUpdate({_id: userId},{$push : {transactions: result._id} }, { new: true }).then(() => {
+                    return res.status(200).json({message: "Loan Approval!", data: {loanId, userId, loanApproval}})
+                })
+            }).catch(err => next(err))
         })
     }).catch(err => {
         let error = new Error(err);
@@ -81,9 +141,9 @@ exports.loanApproval = (req, res) => {
     })
 }
 
-exports.rejectedLoans = (req, res) => {
+exports.rejectedLoans = (req, res, next) => {
     
-    LOAN.find({loanApproval: "rejected"}).then(result => {
+    LOAN.find({loanApproval: "REJECTED"}).then(result => {
         if(!result){
             throw new Error("No Data Found!");
         }
@@ -95,7 +155,7 @@ exports.rejectedLoans = (req, res) => {
     })
 }
 
-exports.loansData = (req, res) => {
+exports.loansData = (req, res, next) => {
 
     const errors = validationResult(req);
 
@@ -107,7 +167,8 @@ exports.loansData = (req, res) => {
 
     //Take from database
 
-    LOAN.find().then(result => {
+    LOAN.findOne({userId: userId}).then(result => {
+        console.log('re', result)
         if(!result){
             throw new Error("No Data Found!");
         }
@@ -120,7 +181,7 @@ exports.loansData = (req, res) => {
                 dueAmount = 0;
             }
 
-            const date1 = new Date(transactionData.date);
+            const date1 = new Date(transactionsData.date);
             const date2 = new Date();
             const diffTime = Math.abs(date2 - date1);
             let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
@@ -129,12 +190,12 @@ exports.loansData = (req, res) => {
             const payedAmount = result.payedAmount; 
             dueAmount = diffDays - 1 * LOAN.dailyPayableAmount;
             const interest = result.interest; 
+            const durationType = result.durationType; 
             const duration = result.duration; 
             const loanStartDate = result.loanStartDate; 
             const loanClosingDate = result.loanClosingDate; 
+            return res.status(200).json({message: "Loan Data", data: {userId, loanAmount, payedAmount, dueAmount, interest, durationType, duration, loanStartDate, loanClosingDate}});
         })
-    
-        return res.status(200).json({message: "Loans Data", data: {userId, loanAmount, payedAmount, dueAmount, interest, duration, loanStartDate, loanClosingDate}});
     }).catch(err => {
         let error = new Error(err);
         error.statuscode = 401

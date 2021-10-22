@@ -4,7 +4,7 @@ const {Schema} = mongoose;
 
 const Loan = new Schema({
     userId: {
-        type:String,
+        type: Schema.Types.ObjectId,
         required: true
     },
     loanAmount: {
@@ -22,6 +22,7 @@ const Loan = new Schema({
     interest: {
         type: Number
     },
+    durationType: String,
     duration: {
         type: Number
     },

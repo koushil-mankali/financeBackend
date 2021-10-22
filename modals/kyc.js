@@ -3,25 +3,25 @@ const mongoose = require("mongoose");
 const {Schema} = mongoose;
 
 const KYC = new Schema({
+    userId: {
+        type: Schema.Types.ObjectId
+    },
     panCardNo: {
-        type:Number,
+        type:String,
         required: true
     },
     panCardImg:{
-        type: String,
-        required: true
+        type: String
     },
     aadharNo: {
         type: Number,
         required: true
     },
     aadharImg: {
-        type: String,
-        required: true
+        type: String
     },
     userPhoto: {
-        type: String,
-        required: true
+        type: String
     }
 }, {timestamps: true})
 

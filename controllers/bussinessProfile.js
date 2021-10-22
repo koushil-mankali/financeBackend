@@ -14,7 +14,7 @@ exports.getData = (req, res) => {
     })
 }
 
-exports.postData = (req, res) => {
+exports.postData = (req, res, next) => {
 
     const errors = validationResult(req);
 
@@ -22,33 +22,36 @@ exports.postData = (req, res) => {
         return res.status(400).json({ message: "Error!", errors: errors.array() });
     }
 
-    BP.findOne({}).then(result => {
+    BP.findOne().then(result => {
         if(result){
-            result.companyName = req.body.companyName;
-            result.logo = req.file.path;
-            result.companyAddress = req.body.companyAddress;
-            result.gstNo = req.body.gstNo;
-            result.panNo = req.body.panNo;
-            result.aadharNo = req.body.aadharNo;
-            result.capitalInvestment = req.body.capitalInvestment;
+            const companyName = req.body.companyName;
+            const companyLogo = req?.file?.path;
+            const companyAddress = req.body.companyAddress;
+            const gstNo = req.body.gstNo;
+            const panNo = req.body.panNo;
+            const aadharNo = req.body.aadharNo;
+            const capitalInvestment = req.body.capitalInvestment;
+            BP.findByIdAndUpdate(result._id, {companyName: companyName, companyLogo:companyLogo, companyAddress: companyAddress, gstNo: gstNo, panNo: panNo, aadharNo: aadharNo, capitalInvestment: capitalInvestment}, (err, docs) => {
+                if(err){
+                    throw new Error("Unable to update data!");
+                }
+                return res.status(201).json({message: "Succesfully Updated!", data: docs});
+            })
+        
+        }else {
+            const companyName = req.body.companyName;
+            const companyLogo = req.file.path;
+            const companyAddress = req.body.companyAddress;
+            const gstNo = req.body.gstNo;
+            const panNo = req.body.panNo;
+            const aadharNo = req.body.aadharNo;
+            const capitalInvestment = req.body.capitalInvestment;
 
-            result.save().then(() => {
-                res.status(201).json({message: "Succesfully Updated!", data: {companyName, logo, companyAddress, gstNo, panNo, aadharNo, capitalInvestment}});
-            }).catch(err => { throw err })
+            const newBP = new BP({companyName: companyName, companyLogo:companyLogo, companyAddress: companyAddress, gstNo: gstNo, panNo: panNo, aadharNo: aadharNo, capitalInvestment: capitalInvestment});
+            newBP.save().then( () => {
+                res.status(201).json({message: "Succesfully Created!", data: {companyName, companyLogo, companyAddress, gstNo, panNo, aadharNo, capitalInvestment}});
+            }).catch(err => { throw(err) })
         }
-        const companyName = req.body.companyName;
-        const logo = req.file.path;
-        const companyAddress = req.body.companyAddress;
-        const gstNo = req.body.gstNo;
-        const panNo = req.body.panNo;
-        const aadharNo = req.body.aadharNo;
-        const capitalInvestment = req.body.capitalInvestment;
-
-        const newBP = new BP({companyName: companyName, logo: logo, companyAddress: companyAddress, gstNo: gstNo, panNo: panNo, aadharNo: aadharNo, capitalInvestment: capitalInvestment});
-        newBP.save().then( () => {
-            res.status(201).json({message: "Succesfully Created!", data: {companyName, logo, companyAddress, gstNo, panNo, aadharNo, capitalInvestment}});
-        }).catch(err => { throw(err) })
-
     }).catch(err => {
         let error = new Error(err);
         error.statuscode = 401

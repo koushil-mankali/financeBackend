@@ -4,7 +4,7 @@ const { validationResult } = require('express-validator');
 
 const User = require("../modals/user");
 
-exports.login = (req, res) => {
+exports.login = (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
 
@@ -14,13 +14,11 @@ exports.login = (req, res) => {
         return res.status(400).json({ message: "Error!", errors: errors.array() });
       }
 
-    User.findOne({email: email}).then(user => {
+    User.findOne({userEmail: email}).then(user => {
         if(!user){
             throw "No User Found!"
         }
-        return user;
-    }).then( user => {
-        bcrypt.compare(password, user.password).then(isMatch => {
+        bcrypt.compare(password, user.userPassword).then(isMatch => {
             if(!isMatch){
                 return res.status(401).json({message: "Failed Authentication"})
             }
@@ -45,13 +43,13 @@ exports.signup = (req, res, next) => {
         return res.status(400).json({ message: "Error!", errors: errors.array() });
       }
 
-    User.findOne({email: email}).then(user => {
+    User.findOne({userEmail: email}).then(user => {
         if(user){
             throw "User already exists!";
         }
 
         bcrypt.hash(password, 12).then(hashedPassword => {
-            const createUser = new User({username: username, email:email, password: hashedPassword});
+            const createUser = new User({userName: username, userEmail:email, userPassword: hashedPassword});
             createUser.save().then(result => {
                 return res.status(200).json({message: "Signup Success!", email: email, password: hashedPassword, username: username})
             })

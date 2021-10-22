@@ -3,26 +3,26 @@ const mongoose = require("mongoose");
 const {Schema} = mongoose;
 
 const User = new Schema({
-    username: {
+    userName: {
         type:String
     },
-    email:{
+    userEmail:{
         type: String
     },
-    phone: {
+    userPhone: {
         type: Number,
     },
-    password: {
+    userPassword: {
         type: String,
         required: true
     },
-    address: {
+    userAddress: {
         type: String
     },
     status:{
         type: String
     },
-    reference: {
+    userReference: {
         type: String
     },
     kycStatus:{
@@ -31,7 +31,11 @@ const User = new Schema({
     kyc:{
         type:String,
         ref: "kyc"
-    }
+    },
+    role:{
+        type:String
+    },
+    transactions:[String]
 }, {timestamps: true})
 
 module.exports = mongoose.model("user", User)

@@ -4,7 +4,7 @@ const {Schema} = mongoose;
 
 const Investment = new Schema({
     capitalAmount: {
-        type:String,
+        type:Number,
         required: true
     },
     profitLoss: {
