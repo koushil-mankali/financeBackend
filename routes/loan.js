@@ -31,8 +31,6 @@ route.post("/loans-approvel", isAuth, [
 
 route.get("/rejected-loans", loanCont.rejectedLoans);
 
-route.post("/approve-loans", isAuth, loanCont.loanApproval);
-
 route.post("/calculate-loan-details", isAuth, loanCont.calculateLoanDetails)
 
 module.exports = route;

@@ -123,11 +123,12 @@ exports.loanApproval = (req, res, next) => {
         if(!result){
             throw new Error("No Data Found!");
         }
+        const dailyPay = result.dailyPayableAmount;
         TRANS.findOne({loanId: loanId, userId: userId}).then(transactions => {
             if(transactions){
                 throw new Error("Loan already Approved!");
             }
-            const newTrans = new TRANS({loanId: loanId, userId: userId, loanStartDate: result.loanStartDate, loanClosingDate: result.loanClosingDate, actualDayOfPay: null, dateOfPaytment: null, payableAmount: null, payedAmount: null, dueAmount: null, date: new Date()});
+            const newTrans = new TRANS({loanId: loanId, userId: userId, loanStartDate: result.loanStartDate, loanClosingDate: result.loanClosingDate, actualDayOfPay: null, payableAmount: dailyPay, dateOfPaytment: null, payedAmount: 0, dueAmount: 0, date: new Date()});
             newTrans.save().then(result => {
                 User.findOneAndUpdate({_id: userId},{$push : {transactions: result._id} }, { new: true }).then(() => {
                     return res.status(200).json({message: "Loan Approval!", data: {loanId, userId, loanApproval}})

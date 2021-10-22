@@ -119,13 +119,12 @@ exports.newTransaction = (req, res, next) => {
         return res.status(400).json({ message: "Error!", errors: errors.array() });
     }
 
-
     const userId = req.body.userId;
     const loanId = req.body.loanId;
     const date = new Date();
     const payedAmount = req.body.payedAmount;
 
-    TRANS.findOne({loanID: loanId, userId: userId}, {sort:{$natural:-1}}).then(result => {
+    TRANS.findOne({loanID: loanId, userId: userId}).sort({ createdAt: -1 }).limit(1).then(result => {
         if(!result){
             throw new Error("No Loan Found!");
         }        
@@ -135,11 +134,11 @@ exports.newTransaction = (req, res, next) => {
         const diffTime = Math.abs(date2 - date1);
         let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
 
-        const actualDayOfPay = new Date(result.date).getDate() + 1;
+        const actualDayOfPay = new Date(result.date);
         const payableAmount = result.payableAmount;
-        const dueAmount = diffDays - 1 * LOAN.dailyPayableAmount;
+        const dueAmount = (diffDays - 1) * result.payableAmount + result.dueAmount;
 
-        const newTrans = new TRANS({userId: userId, loanId: loanId, loanStartDate: result.loanStartDate, loanEndDate: result.loanEndDate, actualDayOfPay: actualDayOfPay, dateOfPaytment: date, payableAmount: payableAmount, payedAmount:payedAmount,dueAmount:dueAmount })
+        const newTrans = new TRANS({userId: userId, loanId: loanId, loanStartDate: result.loanStartDate, loanClosingDate: result.loanClosingDate, actualDayOfPay: actualDayOfPay, dateOfPaytment: date, payableAmount: payableAmount, payedAmount:payedAmount,dueAmount:dueAmount })
         newTrans.save().then( () => {
             return res.status(200).json({message: "Transaction Succesfull!"})
         }).catch(err => { throw err })
