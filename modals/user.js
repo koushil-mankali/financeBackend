@@ -29,7 +29,7 @@ const User = new Schema({
         type: String
     },
     kyc:{
-        type:String,
+        type: Schema.Types.ObjectId,
         ref: "kyc"
     },
     role:{

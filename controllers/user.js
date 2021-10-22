@@ -64,23 +64,23 @@ exports.userKYC = (req, res, next) => {
 
     const userId = req.body.userId;
     const panCardNo = req.body.panCardNo; 
-    const panCardImg = req.body.panImg; 
+    // const panCardImg = req.body.panImg; 
     const aadharNo = req.body.aadharNo; 
-    const aadharImg = req.body.aadharImg; 
-    const userPhoto = req.file.path; 
-
-    console.log(userId, panCardNo, aadharNo)
+    // const aadharImg = req.body.aadharImg; 
+    // const userPhoto = req.file.path; 
 
     User.findOne({_id: userId}).then(result => {
         if(!result){
             throw new Error("No User Found!");
         }
 
-        KYC.findOneAndUpdate({userId: result._id}, {userId: userId, panCardNo: panCardNo, panCardImg: panCardImg, aadharNo: aadharNo, aadharImg: aadharImg, userPhoto: userPhoto},{
+        KYC.findOneAndUpdate({userId: result._id}, {userId: userId, panCardNo: panCardNo,  aadharNo: aadharNo} ,{
             new: true,
             upsert: true
-          }).then(() => {
-              res.status(200).json({message: "KYC Done Succesfully!"});
+          }).then((kycData) => {
+              User.findOneAndUpdate({_id: userId}, {kycStatus: "DONE", kyc: kycData._id}, {new: true}).then(() => {
+                  res.status(200).json({message: "KYC Done Succesfully!"});
+              }).catch(err => next(err))
         }).catch(err => { throw err; })
     }).catch(err => {
         let error = new Error(err);
