@@ -23,4 +23,8 @@ route.post("/user-kyc", isAuth, [
     body("aadharNo").not().isEmpty().withMessage("Please fill all the Fields!")
 ], userCont.userKYC)
 
+route.post("/delete-user", isAuth, [
+    body("userId").not().isEmpty().withMessage("Something went wrong!")
+], userCont.removeUser)
+
 module.exports = route;

@@ -87,6 +87,17 @@ exports.userKYC = (req, res, next) => {
         error.statuscode = 401
         next(error)
     })
-    
+}
 
+exports.removeUser = (req, res, next) => {
+
+    const userId = req.body.userId;
+
+    User.findByIdAndRemove({_id: userId}).then(result => {
+        return res.status(200).json({message: "User Deleted Succesfully!"});
+    }).catch(err => {
+        let error = new Error(err);
+        error.statuscode = 401
+        next(error)
+    })
 }

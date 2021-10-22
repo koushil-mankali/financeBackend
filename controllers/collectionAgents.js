@@ -54,3 +54,16 @@ exports.createCollectionAgent = (req, res, next) => {
         next(error)
     })
 }
+
+exports.removeAgent = (req, res, next) => {
+
+    const agentId = req.body.agentId;
+
+    CAG.findByIdAndRemove({_id: agentId}).then(result => {
+        return res.status(200).json({message: "Agent Deleted Succesfully!"});
+    }).catch(err => {
+        let error = new Error(err);
+        error.statuscode = 401
+        next(error)
+    })
+}
