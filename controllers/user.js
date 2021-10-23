@@ -28,6 +28,7 @@ exports.createUser = (req, res, next) => {
 
     const userName = req.body.userName;
     const userEmail = req.body.userEmail;
+    const userPhoto = req.file.path;
     const userPhone = req.body.userPhone;
     const userPassword = req.body.userPassword;
     const userAddress = req.body.userAddress;
@@ -42,7 +43,7 @@ exports.createUser = (req, res, next) => {
             if(result){
                 throw new Error("User with email already exists!")
             }
-            const addUser = new User({userName: userName, userEmail: userEmail, userPhone: userPhone, userPassword: hashedPassword, userAddress: userAddress, userReference: userReference, kycStatus: kycStatus, kyc: kyc, status: status, role: role});
+            const addUser = new User({userName: userName, userEmail: userEmail, userPhoto:userPhoto, userPhone: userPhone, userPassword: hashedPassword, userAddress: userAddress, userReference: userReference, kycStatus: kycStatus, kyc: kyc, status: status, role: role});
             addUser.save().then( () => {
                 res.status(201).json({message: "Succesfully Created User!"})
             })
