@@ -13,7 +13,7 @@ const BussinessProfile = new Schema({
         type: String
     },
     gstNo: {
-        type: Number,
+        type: String,
     },
     panNo: {
         type: String

@@ -2,7 +2,7 @@ const BP = require("../modals/bussinessProfile");
 const { validationResult } = require('express-validator'); 
 
 exports.getData = (req, res) => {
-    BP.find().then(data => {
+    BP.findOne().then(data => {
         if(!data){
             throw "No data!";
         }

@@ -4,7 +4,7 @@ const { validationResult } = require('express-validator');
 const CAG = require("../modals/collectionAgent");
 
 exports.AllCollectionAgents = (req, res, next) => {
-    CAG.find({}, {agentPassword: 0}).then(result => {
+    CAG.find({}, {agentPassword: 0}).populate("users").then(result => {
         if(!result){
             throw new Error("No Data Found!")
         }
