@@ -3,6 +3,8 @@ const path = require("path");
 const express = require("express");
 const multer = require("multer");
 const mongoose = require("mongoose");
+const cors = require('cors');
+
 
 const homeRoute = require("./routes/home");
 const bussinessRoute = require("./routes/bussinessProfile");
@@ -14,6 +16,7 @@ const investmentRoute = require("./routes/investment");
 const collectionAgentRoute = require("./routes/collectionAgents");
 
 const app = express();
+app.use(cors());
 
 const fileStorage =multer.diskStorage({
   destination: (req, file, cb) => {

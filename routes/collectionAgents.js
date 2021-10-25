@@ -16,7 +16,7 @@ route.post("/create-collection-agent", isAuth, [
     body("agentAadharNo").not().isEmpty().withMessage("Please Fill all the Fields!"),
 ], collectionAgentsCont.createCollectionAgent);
 
-route.post("/delete-agent", isAuth, [
+route.delete("/delete-agent", isAuth, [
     body("agentId").not().isEmpty().withMessage("Something went wrong!")
 ], collectionAgentsCont.removeAgent)
 

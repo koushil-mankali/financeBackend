@@ -8,7 +8,7 @@ const isAuth = (req, res, next) => {
         throw error;
     } 
 
-    const token = authHeader?.split(" ")[1];
+    const token = authHeader.split(" ")[1];
 
     let decodedToken;
 
