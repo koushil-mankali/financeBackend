@@ -64,7 +64,7 @@ res.status(errorstatus).json({message: error._message ? error._message : error.m
 next()
 })
   
-mongoose.connect('mongodb+srv://sample:sample123@cluster0.xb5wo.mongodb.net/finance?retryWrites=true&w=majority', {  serverSelectionTimeoutMS: 5000})
+mongoose.connect('mongodb+srv://sample:<password>@cluster0.xb5wo.mongodb.net/finance?retryWrites=true&w=majority', {  serverSelectionTimeoutMS: 5000})
 .then( () => {
     app.listen(3000)
     console.log("connected");
